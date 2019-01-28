@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.StrutsConstants;
 import org.apache.struts2.dispatcher.PrepareOperations;
+import org.apache.struts2.json.DefaultJSONWriter;
 import org.apache.struts2.json.annotations.SMDMethod;
 import org.apache.struts2.json.rpc.RPCError;
 import org.apache.struts2.json.rpc.RPCErrorCode;
@@ -70,13 +71,6 @@ public class JSONInterceptor extends AbstractInterceptor {
     private String callbackParameter;
     private String jsonContentType = "application/json";
     private String jsonRpcContentType = "application/json-rpc";
-
-    private JSONUtil jsonUtil;
-
-    @Inject
-    public void setJsonUtil(JSONUtil jsonUtil) {
-        this.jsonUtil = jsonUtil;
-    }
 
     @SuppressWarnings("unchecked")
     public String intercept(ActionInvocation invocation) throws Exception {
@@ -174,7 +168,8 @@ public class JSONInterceptor extends AbstractInterceptor {
                 rpcResponse.setError(new RPCError(message, RPCErrorCode.SMD_DISABLED));
                 result = rpcResponse;
             }
-
+            final JSONUtil jsonUtil = new JSONUtil();
+            jsonUtil.setWriter(new DefaultJSONWriter());
             String json = jsonUtil.serialize(result, excludeProperties, getIncludeProperties(),
                     ignoreHierarchy, excludeNullProperties);
             json = addCallbackIfApplicable(request, json);
